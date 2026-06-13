@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nyaya Graph — Indian Legal Knowledge Graph</title>
+    <meta name="description" content="AI-powered Legal Knowledge Graph for Indian Law. Explore case citations, judge networks, statute references, and criminal law concordance.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loader-content">
+            <div class="loader-icon">
+                <svg width="80" height="80" viewBox="0 0 80 80">
+                    <circle cx="40" cy="40" r="35" fill="none" stroke="url(#loaderGrad)" stroke-width="3.5" stroke-dasharray="180" stroke-linecap="round">
+                        <animateTransform attributeName="transform" type="rotate" from="0 40 40" to="360 40 40" dur="1.2s" repeatCount="indefinite"/>
+                    </circle>
+                    <defs>
+                        <linearGradient id="loaderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="var(--accent-primary)"/>
+                            <stop offset="100%" stop-color="var(--accent-secondary)"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            <h2>Nyaya Graph</h2>
+            <p id="loading-text">Initializing Legal Knowledge Graph...</p>
+        </div>
+    </div>
+
+    <!-- Top Navigation -->
+    <nav id="main-nav" class="main-nav">
+        <div class="nav-brand">
+            <div class="brand-icon">⚖️</div>
+            <div>
+                <h1>Nyaya Graph</h1>
+                <span class="brand-sub">Indian Legal Knowledge Graph</span>
+            </div>
+        </div>
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-tab="dashboard" id="tab-dashboard">
+                <i data-lucide="layout-dashboard"></i> Dashboard
+            </button>
+            <button class="nav-tab" data-tab="cases" id="tab-cases">
+                <i data-lucide="briefcase"></i> Cases
+            </button>
+            <button class="nav-tab" data-tab="graph" id="tab-graph">
+                <i data-lucide="network"></i> Graph Explorer
+            </button>
+            <button class="nav-tab" data-tab="landmarks" id="tab-landmarks">
+                <i data-lucide="landmark"></i> Landmarks
+            </button>
+            <button class="nav-tab" data-tab="judges" id="tab-judges">
+                <i data-lucide="scale"></i> Judges
+            </button>
+            <button class="nav-tab" data-tab="statutes" id="tab-statutes">
+                <i data-lucide="scroll"></i> Statutes & BNS
+            </button>
+        </div>
+        <div class="nav-search">
+            <i data-lucide="search" class="search-icon"></i>
+            <input type="text" id="global-search" placeholder="Search cases, judges, statutes..." autocomplete="off">
+            <div id="search-results" class="search-dropdown"></div>
+        </div>
+        <!-- Light/Dark Mode Switcher -->
+        <button id="theme-toggle" class="theme-toggle" title="Toggle Light/Dark Mode">
+            <i data-lucide="sun" class="sun-icon"></i>
+            <i data-lucide="moon" class="moon-icon"></i>
+        </button>
+    </nav>
+
+    <!-- Main Content -->
+    <main id="main-content" class="main-content">
+        
+        <!-- Dashboard Tab -->
+        <section id="section-dashboard" class="tab-section active">
+            <div class="dashboard-header">
+                <h2>Legal Intelligence Dashboard</h2>
+                <p>Real-time analytics and structural insights from the Indian Legal Knowledge Graph</p>
+            </div>
+            
+            <div class="stats-grid" id="stats-grid">
+                <div class="stat-card stat-primary" id="stat-cases">
+                    <div class="stat-icon-wrapper"><i data-lucide="file-text"></i></div>
+                    <div class="stat-value" id="stat-cases-val">—</div>
+                    <div class="stat-label">Judgments</div>
+                </div>
+                <div class="stat-card stat-accent" id="stat-judges">
+                    <div class="stat-icon-wrapper"><i data-lucide="user-check"></i></div>
+                    <div class="stat-value" id="stat-judges-val">—</div>
+                    <div class="stat-label">Judges</div>
+                </div>
+                <div class="stat-card stat-success" id="stat-statutes">
+                    <div class="stat-icon-wrapper"><i data-lucide="book-open"></i></div>
+                    <div class="stat-value" id="stat-statutes-val">—</div>
+                    <div class="stat-label">Statutes</div>
+                </div>
+                <div class="stat-card stat-warn" id="stat-citations">
+                    <div class="stat-icon-wrapper"><i data-lucide="link"></i></div>
+                    <div class="stat-value" id="stat-citations-val">—</div>
+                    <div class="stat-label">Citations</div>
+                </div>
+                <div class="stat-card stat-info" id="stat-edges">
+                    <div class="stat-icon-wrapper"><i data-lucide="git-branch"></i></div>
+                    <div class="stat-value" id="stat-edges-val">—</div>
+                    <div class="stat-label">Total Edges</div>
+                </div>
+                <div class="stat-card stat-dark" id="stat-nodes">
+                    <div class="stat-icon-wrapper"><i data-lucide="circle-dot"></i></div>
+                    <div class="stat-value" id="stat-nodes-val">—</div>
+                    <div class="stat-label">Total Nodes</div>
+                </div>
+            </div>
+            
+            <div class="dashboard-grid">
+                <div class="dashboard-card" id="card-top-landmarks">
+                    <h3><i data-lucide="star"></i> Top Landmark Cases</h3>
+                    <div id="landmarks-preview" class="card-content"></div>
+                </div>
+                <div class="dashboard-card" id="card-top-judges">
+                    <h3><i data-lucide="award"></i> Most Active Judges</h3>
+                    <div id="judges-preview" class="card-content"></div>
+                </div>
+                <div class="dashboard-card" id="card-top-statutes">
+                    <h3><i data-lucide="bookmark"></i> Most Referenced Statutes</h3>
+                    <div id="statutes-preview" class="card-content"></div>
+                </div>
+                <!-- Interactive SVG Charts -->
+                <div class="dashboard-card" id="card-court-dist">
+                    <h3><i data-lucide="building-2"></i> Court Distribution</h3>
+                    <div id="court-chart" class="chart-container-svg"></div>
+                </div>
+                <div class="dashboard-card wide" id="card-year-dist">
+                    <h3><i data-lucide="trending-up"></i> Timeline of Judgments (Decades Trend)</h3>
+                    <div id="year-chart" class="chart-container-svg"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cases Database Tab -->
+        <section id="section-cases" class="tab-section">
+            <div class="section-header">
+                <h2><i data-lucide="folder-open"></i> Case Database Explorer</h2>
+                <p>Browse court records. Search, sort, and filter judgments. Click on any case to inspect details, precedents, and the full judgment text.</p>
+            </div>
+            <div class="cases-toolbar">
+                <div class="search-input-wrapper">
+                    <i data-lucide="search" class="input-icon"></i>
+                    <input type="text" id="cases-search" class="cases-search-input" placeholder="Search cases by name..." autocomplete="off">
+                </div>
+                <select id="cases-court-filter" class="graph-select">
+                    <option value="">All Courts</option>
+                </select>
+                <select id="cases-sort" class="graph-select">
+                    <option value="year_desc">Newest First</option>
+                    <option value="year_asc">Oldest First</option>
+                    <option value="name">Alphabetical</option>
+                </select>
+                <span id="cases-total" class="cases-total"></span>
+            </div>
+            <div id="cases-list" class="data-list"></div>
+            <div id="cases-pagination" class="cases-pagination"></div>
+        </section>
+
+        <!-- Graph Explorer Tab -->
+        <section id="section-graph" class="tab-section">
+            <div class="graph-controls-panel">
+                <div class="graph-toolbar">
+                    <div class="toolbar-item">
+                        <label>Filter Nodes</label>
+                        <select id="graph-filter" class="graph-select">
+                            <option value="all">All Node Types</option>
+                            <option value="Case">Cases Only</option>
+                            <option value="Judge">Judges Only</option>
+                            <option value="Statute">Statutes Only</option>
+                        </select>
+                    </div>
+                    
+                    <div class="toolbar-item">
+                        <label>Node Limit</label>
+                        <div class="slider-wrapper">
+                            <input type="range" id="graph-limit" min="20" max="300" value="100" class="graph-slider">
+                            <span id="graph-limit-label" class="slider-label">100 nodes</span>
+                        </div>
+                    </div>
+
+                    <!-- Autocomplete search in graph -->
+                    <div class="toolbar-item graph-search-box">
+                        <label>Search & Focus</label>
+                        <div class="graph-search-container">
+                            <i data-lucide="search" class="input-icon"></i>
+                            <input type="text" id="graph-node-search" placeholder="Type node name..." autocomplete="off">
+                            <div id="graph-search-results" class="graph-search-dropdown"></div>
+                        </div>
+                    </div>
+
+                    <!-- Neighborhood Depth Filter -->
+                    <div class="toolbar-item">
+                        <label>Neighborhood Mode</label>
+                        <select id="graph-depth" class="graph-select">
+                            <option value="all">Full Graph View</option>
+                            <option value="1">1-Hop Connection</option>
+                            <option value="2">2-Hop Connection</option>
+                        </select>
+                    </div>
+
+                    <!-- Control Buttons -->
+                    <div class="toolbar-actions">
+                        <button id="btn-physics-toggle" class="btn-secondary" title="Pause / Resume layout simulation">
+                            <i data-lucide="pause" id="physics-icon"></i> <span id="physics-text">Pause</span>
+                        </button>
+                        <button id="btn-zoom-in" class="btn-secondary" title="Zoom In"><i data-lucide="zoom-in"></i></button>
+                        <button id="btn-zoom-out" class="btn-secondary" title="Zoom Out"><i data-lucide="zoom-out"></i></button>
+                        <button id="btn-fit-graph" class="btn-secondary" title="Reset view and fit to screen"><i data-lucide="maximize-2"></i> Fit</button>
+                        <button id="btn-reload-graph" class="btn-primary"><i data-lucide="refresh-cw"></i> Reload</button>
+                    </div>
+                </div>
+                <div class="graph-instructions">
+                    <i data-lucide="info"></i>
+                    <span><strong>Mouse interactions:</strong> Drag nodes to reposition • Scroll wheel to Zoom • Pan background to move • Double-click Case to view details • Hover to highlight connections.</span>
+                </div>
+            </div>
+            
+            <div id="graph-container" class="graph-container">
+                <canvas id="graph-canvas"></canvas>
+                <!-- HTML dynamic tooltip overlay -->
+                <div id="graph-tooltip" class="graph-tooltip hidden"></div>
+            </div>
+            
+            <div id="node-detail-panel" class="node-detail-panel hidden">
+                <button id="close-detail" class="close-btn" title="Close Panel">&times;</button>
+                <div id="node-detail-content"></div>
+            </div>
+        </section>
+
+        <!-- Landmarks Tab -->
+        <section id="section-landmarks" class="tab-section">
+            <div class="section-header">
+                <h2><i data-lucide="landmark"></i> Constitutional Landmark Cases</h2>
+                <p>Cornerstone judgments ranked by the number of citations received from subsequent decisions.</p>
+            </div>
+            <div id="landmarks-list" class="data-list"></div>
+        </section>
+
+        <!-- Judges Tab -->
+        <section id="section-judges" class="tab-section">
+            <div class="section-header">
+                <h2><i data-lucide="users"></i> Judicial Networks</h2>
+                <p>Judicial benches ranked by decision output. Click on a judge's card to examine their caseload and precedents.</p>
+            </div>
+            <div id="judges-list" class="data-list"></div>
+        </section>
+
+        <!-- Statutes & BNS Tab -->
+        <section id="section-statutes" class="tab-section">
+            <div class="section-header">
+                <h2><i data-lucide="book-open"></i> Statutes & Criminal Law Concordance Hub</h2>
+                <p>Analyze citation impact of statutory codes and map references across the **July 2024 Transition** (IPC ⇆ BNS, CrPC ⇆ BNSS, IEA ⇆ BSA).</p>
+            </div>
+
+            <div class="statutes-dashboard-layout">
+                <!-- Concordance Search Tool -->
+                <div class="concordance-card">
+                    <div class="card-header-icon"><i data-lucide="git-compare"></i></div>
+                    <h3>Indian Criminal Law Concordance Tool</h3>
+                    <p class="concordance-help">Enter a section number from the old laws (IPC, CrPC, IEA) or the new laws (BNS, BNSS, BSA) to find its direct corresponding statutory provision under the 2023 reforms (effective July 1, 2024).</p>
+                    
+                    <div class="concordance-form">
+                        <div class="form-group">
+                            <label for="concordance-law-type">Select Act Type</label>
+                            <select id="concordance-law-type" class="graph-select full-width">
+                                <option value="IPC">IPC ⇆ BNS (Substantive Penal Code)</option>
+                                <option value="CrPC">CrPC ⇆ BNSS (Procedural Criminal Code)</option>
+                                <option value="IEA">IEA ⇆ BSA (Evidence Law)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="concordance-section-input">Section Number</label>
+                            <div class="input-with-button">
+                                <input type="text" id="concordance-section-input" placeholder="e.g., 302, 438, 32, 103, 482" autocomplete="off">
+                                <button id="btn-concordance-lookup" class="btn-primary">Lookup</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="concordance-result" class="concordance-result-box hidden"></div>
+                </div>
+
+                <!-- Statutes Reference List -->
+                <div class="statutes-list-card">
+                    <h3><i data-lucide="list-ordered"></i> Top Referenced Statutory Provisions</h3>
+                    <div id="statutes-list" class="data-list"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Case Detail Modal -->
+    <div id="case-modal" class="modal hidden">
+        <div class="modal-backdrop" id="modal-backdrop"></div>
+        <div class="modal-content">
+            <!-- Navigation history controls inside the modal -->
+            <div class="modal-navigation-bar">
+                <div class="modal-history-actions">
+                    <button class="modal-nav-btn" id="modal-nav-back" title="Go Back" disabled>
+                        <i data-lucide="arrow-left"></i> Back
+                    </button>
+                    <button class="modal-nav-btn" id="modal-nav-forward" title="Go Forward" disabled>
+                        Forward <i data-lucide="arrow-right"></i>
+                    </button>
+                </div>
+                <div class="modal-actions-right">
+                    <button class="modal-nav-btn text-accent" id="modal-action-copy" title="Copy case share details">
+                        <i data-lucide="share-2"></i> Share
+                    </button>
+                    <button class="modal-close" id="modal-close">&times;</button>
+                </div>
+            </div>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
