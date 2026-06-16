@@ -3,10 +3,10 @@ services:
     name: nyaya-graph
     runtime: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn api.server:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    startCommand: gunicorn api.server:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120
     plan: free
     envVars:
-      - key: PYTHON_VERSION
-        value: "3.11.9"
       - key: FLASK_ENV
         value: production
+      - key: PYTHON_VERSION
+        value: 3.11.9
